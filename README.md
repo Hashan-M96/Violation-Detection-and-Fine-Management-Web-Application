@@ -65,7 +65,7 @@ This web application provides:
 
 ---
 
-## Installation (concrete commands)
+## Installation
 
 1. Clone the repository
    ```
@@ -94,100 +94,6 @@ This web application provides:
      ```
      pip install flask sqlalchemy flask-migrate requests python-dotenv gunicorn
      ```
-
-4. Create the database (SQLite example)
-   - If the app uses Flask-Migrate:
-     ```
-     export FLASK_APP=app.py        # or set FLASK_APP in .env for Windows: set FLASK_APP=app.py
-     flask db init
-     flask db migrate -m "Initial migration"
-     flask db upgrade
-     ```
-   - If no migrations, an alternative is to run a provided script (example):
-     ```
-     python scripts/create_db.py
-     ```
-   (Adjust these commands to whatever migrations / create-db flow the repo includes.)
-
----
-
-## Configuration / environment variables
-Create a `.env` file in the project root (or set env vars in your shell). Example `.env`:
-```
-FLASK_APP=app.py
-FLASK_ENV=development
-SECRET_KEY=your-secret-key
-DATABASE_URL=sqlite:///data/dev.db
-DETECTION_API_URL=https://detection-api.example.com/predict
-DETECTION_API_KEY=optional-api-key
-```
-
-- FLASK_APP: Flask entrypoint (app.py)
-- DATABASE_URL: SQLAlchemy URL (sqlite or a production DB URI)
-- DETECTION_API_URL: remote or local detection API endpoint used for seatbelt detection
-- DETECTION_API_KEY: if API requires authentication
-
-Load .env automatically (use python-dotenv or the repo's config loader).
-
----
-
-## Running the app
-
-Development server (Flask):
-```
-# Activate venv first
-export FLASK_APP=app.py
-export FLASK_ENV=development
-flask run --host=0.0.0.0 --port=5000
-```
-Windows PowerShell:
-```
-$env:FLASK_APP="app.py"
-$env:FLASK_ENV="development"
-flask run --host=0.0.0.0 --port=5000
-```
-
-Direct run (if app defines run block):
-```
-python app.py
-```
-
-Production (Gunicorn example):
-```
-gunicorn --bind 0.0.0.0:8000 app:app
-```
-Use a proper WSGI server + reverse proxy (nginx) for production.
-
----
-
-## API examples
-
-1. Call detection API via app (example cURL to your app)
-```
-curl -X POST "http://localhost:5000/api/detect" \
-  -F "image=@/path/to/photo.jpg"
-```
-
-2. Directly call the external detection API (if needed)
-```
-curl -X POST "https://detection-api.example.com/predict" \
-  -H "Authorization: Bearer $DETECTION_API_KEY" \
-  -F "image=@/path/to/photo.jpg"
-```
-
-3. Create a violation manually (example):
-```
-curl -X POST "http://localhost:5000/api/violations" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "type": "speeding",
-    "vehicle_number": "ABC-1234",
-    "location": "Main Street",
-    "timestamp": "2025-10-21T09:00:00Z",
-    "notes":"Driver speeding"
-  }'
-```
-
 ---
 
 ## Step‑by‑step walkthrough — what the web app does
