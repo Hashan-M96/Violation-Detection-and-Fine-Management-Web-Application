@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fine Confirmation | Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #6a11cb, white);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-left: 250px;
+        }
+
+        .side-nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: #162935;
+            color: white;
+            padding: 1rem;
+            z-index: 1100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-logo {
+            width: 100px;
+            height: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+        }
+
+        .top-nav {
+            background: linear-gradient(135deg, #162935, #0f1113);
+            padding: 1rem;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 250px;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            color: #f4f6f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .container {
+            margin-top: 80px;
+            padding: 2rem;
+        }
+
+        .pending-status {
+            color: orange;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .alert-float {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1500;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="side-nav">
+        <div class="nav-brand">
+            <img src="{{ url_for('static', filename='logo/logo.jpeg') }}" alt="Logo" class="nav-logo">
+            <span>Admin Panel</span>
+        </div>
+        <nav>
+            <a href="/admin/dashboard" class="nav-item">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/admin/fine_confirmation" class="nav-item">
+                <i class="bi bi-check2-circle"></i> Fine Confirmation
+            </a>
+            <a href="/admin/fines_history" class="nav-item">
+                <i class="bi bi-receipt"></i> Fine History
+            </a>
+            <a href="{{ url_for('register_officer') }}" class="nav-item">
+                <i class="bi bi-person-plus-fill"></i> Register Officer
+            </a>
+            <a href="{{ url_for('admin_register_vehicle') }}" class="nav-item">
+                <i class="bi bi-car-front"></i> Register Vehicle
+            </a>
+        </nav>
+    </div>
+
+    <nav class="top-nav">
+        <div class="nav-content">
+            <h1 class="nav-title">Fine Confirmation</h1>
+            <div class="nav-actions">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Manage Fines Awaiting Confirmation</h2>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Fine ID</th>
+                    <th>Vehicle Number</th>
+                    <th>Date & Time</th>
+                    <th>Amount</th>
+                    <th>Issued By</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fine in fines %}
+                <tr>
+                    <td>{{ fine.id }}</td>
+                    <td>{{ fine.vehicle_number }}</td>
+                    <td>{{ fine.timestamp }}</td>
+                    <td>LKR {{ fine.fine_amount }}</td>
+                    <td>{{ fine.issued_by }}</td>
+                    <td class="pending-status">{{ fine.status }}</td>
+                    <td class="action-btns">
+                        <button class="btn btn-success btn-sm approve-btn" data-id="{{ fine.id }}">Approve</button>
+                        <button class="btn btn-danger btn-sm reject-btn" data-id="{{ fine.id }}">Reject</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.approve-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const fineId = this.dataset.id;
+                updateFineStatus(fineId, 'Approved');
+            });
+        });
+
+        document.querySelectorAll('.reject-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const fineId = this.dataset.id;
+                updateFineStatus(fineId, 'Rejected');
+            });
+        });
+
+        function updateFineStatus(fineId, action) {
+            fetch(`/admin/update_fine_status/${fineId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: action })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert('Failed to update fine status.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

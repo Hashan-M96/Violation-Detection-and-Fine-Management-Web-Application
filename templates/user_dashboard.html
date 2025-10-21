@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard | Vehicle Violation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #162935;
+            --secondary-blue: #0f1113;
+        }
+    
+        body {
+            background: linear-gradient(to bottom right, #6a11cb, white);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-left: 250px;
+        }
+    
+
+        .side-nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: var(--primary-blue);
+            color: white;
+            padding: 1rem;
+            z-index: 1100;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav-logo {
+            width: 100px;
+            height: auto;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+        }
+
+        .welcome-message {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute;
+            left: 5px;
+            top: 20px;
+            width: 250px;
+            height: 120px;
+            z-index: 10;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .metrics-container {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 0;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            flex: 1;
+            margin: 0 10px;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-card-fine {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .metric-card-pending {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .metric-card-paid {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .metric-card-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            opacity: 0.7;
+        }
+
+        .violations-table {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .top-nav {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            padding: 1rem;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 250px;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-content {
+            color:#f4f6f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-filter {
+            margin-bottom: 1rem;
+        }
+
+        .alert-float {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1500;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-dialog {
+            max-width: 500px;
+            margin: 1.75rem auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+        
+        .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            background-color: white;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .fine-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .fine-details p {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 1050;
+        }
+
+        .modal-backdrop {
+            z-index: 1040;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+    <div class="side-nav">
+        <div class="nav-brand">
+            <img src="{{ url_for('static', filename='logo/logo.jpeg') }}" alt="Logo" class="nav-logo">
+            <span>User Panel</span>
+        </div>
+        <nav>
+            <a href="/user/dashboard" class="nav-item">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/user/fines_history" class="nav-item">
+                <i class="bi bi-receipt"></i> Fine History
+            </a>
+            <a href="/user/profile" class="nav-item">
+                <i class="bi bi-person-circle"></i> Profile
+            </a>
+        </nav>
+    </div>
+
+    <nav class="top-nav">
+        <div class="nav-content">
+            <h1 class="nav-title">
+            {% if request.endpoint == 'fines_history' %}
+                <i class="bi bi-receipt"></i> Fine History
+                {% else %}
+                🚦 My Violations Dashboard
+            {% endif %}
+        </h1>
+            <div class="nav-actions">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="welcome-message">
+                <h4>Hi {{ vehicle_details.owner_name }}, Welcome!</h4>
+                <p class="text-muted mb-0">Vehicle No: {{ session.username }}</p>
+            </div>
+
+            <div class="metrics-container">
+                <div class="metric-card metric-card-fine">
+                    <div class="metric-card-icon">💰</div>
+                    <div>
+                        <h6>Total Fine Amount</h6>
+                        <h4>LKR {{ "%.2f"|format(stats[5] or 0) }}</h4>
+                    </div>
+                </div>
+                <div class="metric-card metric-card-pending">
+                    <div class="metric-card-icon">⏳</div>
+                    <div>
+                        <h6>Pending Amount</h6>
+                        <h4>LKR {{ "%.2f"|format(stats[3] or 0) }}</h4>
+                    </div>
+                </div>
+                <div class="metric-card metric-card-paid">
+                    <div class="metric-card-icon">🚨</div>
+                    <div>
+                        <h6>Total Violations</h6>
+                        <h4>{{ (stats[0] or 0) }}</h4>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="violations-table">
+                <h4 class="mb-4">📝 Pending Violations</h4>
+                <div class="table-responsive">
+                    {% if pending_violations %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Vehicle Number</th>
+                                <th>Violation Type</th>
+                                <th>Fine Amount</th>
+                                <th>Date & Time</th>
+                                <th>Issued By</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for violation in pending_violations %}
+                            <tr>
+                                <td>{{ violation.vehicle_number }}</td>
+                                <td>{{ violation.violation_type }}</td>
+                                <td>LKR {{ violation.fine_amount }}</td>
+                                <td>{{ violation.timestamp }}</td>
+                                <td>{{ violation.officer_id }}</td>
+                                <td><span class="badge bg-warning">{{ violation.status }}</span></td>
+                                <td>
+                                    <button 
+                                    class="btn btn-success btn-sm pay-fine-btn"
+                                    data-vehicle="{{ violation.vehicle_number }}"
+                                    data-violation="{{ violation.violation_type }}"
+                                    data-amount="{{ violation.fine_amount }}"
+                                    data-date="{{ violation.timestamp }}"
+                                    data-officer="{{ violation.officer_id }}"
+                                    data-id="{{ violation.id }}">
+                                    <i class="bi bi-credit-card me-1"></i>Pay Fine
+                                </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-emoji-smile"></i>
+                        <h5>No Fines issued to your Vehicle!</h5>
+                        <p>Keep following traffic rules and stay safe.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="payment-details">
+                        <p><strong>Vehicle Number:</strong> <span id="modal-vehicle"></span></p>
+                        <p><strong>Violation Type:</strong> <span id="modal-violation"></span></p>
+                        <p><strong>Fine Amount:</strong> LKR <span id="modal-amount"></span></p>
+                        <p><strong>Issue Date:</strong> <span id="modal-date"></span></p>
+                        <p><strong>Issued By:</strong> <span id="modal-officer"></span></p>
+
+                    <div class="form-group mt-3">
+                        <label for="paymentMethod">Payment Method</label>
+                        <select id="paymentMethod" class="form-select">
+                            <option value="">Select Payment Method</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="online">Online</option>
+                            <option value="cash">Cash</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mt-3" id="depositSlipUpload" style="display: none;">
+                        <label for="depositSlip">Upload Deposit Slip</label>
+                        <input type="file" class="form-control" id="depositSlip" accept="image/*">
+                    </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="confirmPayment">Confirm Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="successAlert" class="alert alert-success alert-float" style="display: none;">
+        Payment successful!
+        <button type="button" id="downloadReceipt" class="btn btn-link">Download Receipt</button>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentViolationId = null;
+            const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            
+            document.querySelectorAll('.pay-fine-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const violationId = this.dataset.id;
+                    const vehicleNumber = this.dataset.vehicle;
+                    const violationType = this.dataset.violation;
+                    const amount = this.dataset.amount;
+                    const date = this.dataset.date;
+                    const officer = this.dataset.officer;
+                    
+                    document.getElementById('modal-vehicle').textContent = vehicleNumber;
+                    document.getElementById('modal-violation').textContent = violationType;
+                    document.getElementById('modal-amount').textContent = amount;
+                    document.getElementById('modal-date').textContent = date;
+                    document.getElementById('modal-officer').textContent = officer;
+                    
+                    currentViolationId = violationId;
+
+                    // Reset and show the modal
+                    document.getElementById('paymentMethod').value = '';
+                    document.getElementById('depositSlipUpload').style.display = 'none';
+                    
+                    paymentModal.show();
+                });
+            });
+            // Show/hide deposit slip upload based on payment method
+            document.getElementById('paymentMethod').addEventListener('change', function() {
+                const depositSlipUpload = document.getElementById('depositSlipUpload');
+                if (this.value === 'bank_transfer' || this.value === 'online') {
+                    depositSlipUpload.style.display = 'block';
+                } else {
+                    depositSlipUpload.style.display = 'none';
+                }
+            });
+        
+            document.getElementById('confirmPayment').addEventListener('click', function() {
+                if (currentViolationId) {
+                    const paymentMethod = document.getElementById('paymentMethod').value;
+                    if (!paymentMethod) {
+                        alert('Please select a payment method.');
+                        return;
+                    }            
+
+
+                    const depositSlip = document.getElementById('depositSlip').files[0];
+                    const formData = new FormData();
+                    formData.append('violation_id', currentViolationId);
+                    formData.append('payment_method', paymentMethod);
+
+                    if (depositSlip) {
+                        formData.append('deposit_slip', depositSlip);
+                    }
+        
+                    fetch('/user/pay_fine', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            paymentModal.hide();
+                            
+                            const alert = document.getElementById('successAlert');
+                            alert.style.display = 'block';
+
+                            document.getElementById('downloadReceipt').addEventListener('click', function() {
+                                window.open(data.receipt_url);
+                            });
+                            
+                            setTimeout(() => {
+                                alert.style.display = 'none';
+                                window.location.reload();
+                            }, 5000);
+                        } else {
+                            alert(data.message || 'Failed to process payment. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while processing the payment.');
+                    });
+                }
+            });
+        });
+        </script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Fine History | Vehicle Violation System</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" rel="stylesheet">
+        <style>
+            :root {
+                --primary-blue: #162935;
+                --secondary-blue: #0f1113;
+            }
+    
+            body {
+                background: linear-gradient(to bottom right, #6a11cb, white);
+                min-height: 100vh;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin-left: 50px;
+            }
+    
+            .top-nav {
+                background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+                padding: 1rem;
+                position: fixed;
+                top: 0;
+                left: 250px;
+                right: 0;
+                z-index: 1000;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+    
+            .nav-content {
+                color: #f4f6f7;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 1rem;
+            }
+    
+            .nav-actions {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+            }
+    
+            .content-wrapper {
+                margin-left: 250px;
+                margin-top: 80px;
+                padding: 2rem;
+            }
+    
+            .search-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 2rem;
+            }
+    
+            .search-box {
+                max-width: 300px;
+                margin-left: auto;
+            }
+            
+            .status-filters {
+                margin-bottom: 1.5rem;
+                display: flex;
+                gap: 0.5rem;
+            }
+    
+            .filter-btn {
+                padding: 0.5rem 1.5rem;
+                border-radius: 20px;
+                transition: all 0.3s ease;
+            }
+    
+            .filter-btn:hover {
+                transform: translateY(-2px);
+            }
+
+            .status-filters .filter-btn {
+                padding: 0.5rem 1.5rem;
+                border-radius: 20px;
+                font-weight: bold;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+        
+            .status-filters .btn-primary {
+                background-color: #007bff;
+                color: white;
+                border: 2px solid #0056b3;
+            }
+        
+            .status-filters .btn-outline-primary {
+                background-color: #f0f8ff;
+                color: #0056b3;
+                border: 2px solid #0056b3;
+            }
+        
+            .status-filters .btn-warning {
+                background-color: #ffc107;
+                color: black;
+                border: 2px solid #d39e00;
+            }
+        
+            .status-filters .btn-outline-warning {
+                background-color: #fff3cd;
+                color: #856404;
+                border: 2px solid #856404;
+            }
+        
+            .status-filters .btn-success {
+                background-color: #28a745;
+                color: white;
+                border: 2px solid #1e7e34;
+            }
+        
+            .status-filters .btn-outline-success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 2px solid #155724;
+            }
+    
+            .view-all-check {
+                margin-bottom: 1rem;
+            }
+    
+    
+            .fines-table {
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+    
+            .side-nav {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 250px;
+                background: var(--primary-blue);
+                color: white;
+                padding: 1rem;
+                z-index: 1100;
+            }
+    
+            .nav-brand {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+    
+            .nav-logo {
+                width: 100px;
+                height: auto;
+            }
+    
+            .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 1rem;
+                color: white;
+                text-decoration: none;
+                transition: background-color 0.3s;
+                border-radius: 8px;
+                margin: 0.5rem 0;
+            }
+
+            .nav-item:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+                text-decoration: none;
+            }
+        
+            .nav-divider {
+                height: 1px;
+                background-color: rgba(255,255,255,0.1);
+                margin: 1rem 0;
+            }
+        
+            .main-content {
+                margin-top: 80px;
+                padding: 2rem;
+            }
+        </style>
+    </head>
+<body>
+    <div class="side-nav">
+        <div class="nav-brand">
+            <img src="{{ url_for('static', filename='logo/logo.jpeg') }}" alt="Logo" class="nav-logo">
+            <span>Admin Panel</span>
+        </div>
+        <nav>
+            <a href="/admin/dashboard" class="nav-item">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/admin/fines_history" class="nav-item">
+                <i class="bi bi-receipt"></i> Fine History
+            </a>
+            <div class="nav-divider"></div>
+            <a href="{{ url_for('register_officer') }}" class="nav-item">
+                <i class="bi bi-person-plus-fill"></i> Register Officer
+            </a>
+            <a href="{{ url_for('admin_register_vehicle') }}" class="nav-item">
+                <i class="bi bi-car-front"></i> Register Vehicle
+            </a>
+            <a href="/admin/user_credentials" class="nav-item">
+                <i class="bi bi-key"></i> User Credentials
+            </a>
+            <a href="/admin/fine_update" class="nav-item">
+                <i class="bi bi-cash"></i> Fine Update
+            </a>
+            <a href="/admin/vehicle_reports" class="nav-item">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Vehicles Reports
+            </a>
+        </nav>
+    </div>
+    
+    <nav class="top-nav">
+        <div class="nav-content">
+            <h1 class="nav-title">
+                {% if request.endpoint == 'fines_history' %}
+                    <i class="bi bi-receipt"></i> Fine History
+                {% elif request.endpoint == 'register_officer' %}
+                    <i class="bi bi-person-plus-fill"></i> Register Officer
+                {% elif request.endpoint == 'admin_register_vehicle' %}
+                    <i class="bi bi-car-front"></i> Register Vehicle
+                {% else %}
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                {% endif %}
+            </h1>
+            <div class="nav-actions">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="content-wrapper">
+        <div class="search-container">
+            <form method="POST" class="search-box" id="searchForm">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="vehicle_number" 
+                           placeholder="Search vehicle..." 
+                           value="{{ vehicle_number }}">
+                    <input type="hidden" name="view_all" value="{{ 'true' if view_all else 'false' }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="form-check d-flex justify-content-between align-items-center mb-1">
+            <div>
+                <form method="POST" id="viewAllForm">
+                    <input class="form-check-input" type="checkbox" name="view_all" id="viewAllCheck" 
+                        value="true" {% if view_all %}checked{% endif %}>
+                    <label class="form-check-label" for="viewAllCheck">
+                        View all officers' fines
+                    </label>
+                </form>
+            </div>
+            <div>
+                <form action="{{ url_for('download_fines_report') }}" method="get">
+                    <input type="hidden" name="view_all" value="{{ 'true' if view_all else 'false' }}">
+                    <input type="hidden" name="vehicle_number" value="{{ vehicle_number }}">
+                    <button type="submit" class="btn btn-success btn-download">
+                        <i class="bi bi-download me-2"></i>Download Report
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="status-filters">
+            <a href="{{ url_for('fines_history', status='all', view_all='true' if view_all else 'false', vehicle_number=vehicle_number) }}" 
+               class="btn filter-btn btn-{{ 'primary' if current_status == 'all' else 'outline-primary' }}">
+                <i class="bi bi-collection me-2"></i>All
+            </a>
+            <a href="{{ url_for('fines_history', status='pending', view_all='true' if view_all else 'false', vehicle_number=vehicle_number) }}" 
+               class="btn filter-btn btn-{{ 'warning' if current_status == 'pending' else 'outline-warning' }}">
+                <i class="bi bi-clock-history me-2"></i>Pending
+            </a>
+            <a href="{{ url_for('fines_history', status='paid', view_all='true' if view_all else 'false', vehicle_number=vehicle_number) }}" 
+               class="btn filter-btn btn-{{ 'success' if current_status == 'paid' else 'outline-success' }}">
+                <i class="bi bi-check-circle me-2"></i>Paid
+            </a>
+        </div>
+
+        <div class="table-responsive mt-3">
+            <table class="table fines-table">
+                <thead>
+                    <tr>
+                        <th>Vehicle Number</th>
+                        <th>Issued By</th>
+                        <th>Violation Type</th>
+                        <th>Fine Amount</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fine in fines %}
+                    <tr>
+                        <td>{{ fine.vehicle_number }}</td>
+                        <td>{{ fine.officer_id }}</td>
+                        <td>{{ fine.violation_type }}</td>
+                        <td>LKR {{ "%.2f"|format(fine.fine_amount) }}</td>
+                        <td>{{ fine.timestamp }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if fine.status.lower() == 'paid' else 'warning' }}">
+                                {{ fine.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Handle view all checkbox changes
+        document.getElementById('viewAllCheck').addEventListener('change', function() {
+            document.getElementById('viewAllForm').submit();
+        });
+
+        // Maintain view_all state and search terms in filter links
+        document.querySelectorAll('.status-filters a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const searchTerm = document.querySelector('input[name="vehicle_number"]').value;
+                if (searchTerm) {
+                    this.href = this.href + '&vehicle_number=' + encodeURIComponent(searchTerm);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

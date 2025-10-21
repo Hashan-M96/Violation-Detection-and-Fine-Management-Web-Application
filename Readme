@@ -1,0 +1,17 @@
+Here's a polished version for your README file:
+
+---
+
+## Prerequisites
+
+Ensure you have **Python 3.6 or later** installed on your system.
+
+## Installation
+
+To install the required dependencies, run the following command:
+
+```bash
+pip install -r requirements.txt
+```
+
+This will install all necessary modules listed in the `requirements.txt` file.

@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | Vehicle Violation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #162935;
+            --secondary-blue: #0f1113;
+        }
+
+        body {
+            background: linear-gradient(to bottom right, #6a11cb, white);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-left: 250px;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .metrics-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            flex: 1;
+            margin: 0 10px;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-card-fine {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .metric-card-pending {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .metric-card-violations {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .metric-card-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            opacity: 0.7;
+        }
+
+        .violation-form {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 300px;
+            padding: 1.5rem;
+        }
+
+        .violation-detection-form {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            min-height: 300px;
+            height: auto;
+            overflow-y: auto;
+            display: none;
+            margin-top: 20px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary-blue);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #image-preview {
+            width: 100%;
+            height: auto;
+            display: none;
+        }
+
+        .upload-area:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-color: var(--secondary-blue);
+        }
+
+        #vehicle-details {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .detection-result {
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .detection-result-violation {
+            background-color: var(--violation-red);
+            color: white;
+        }
+
+        .detection-result-safe {
+            background-color: var(--success-green);
+            color: white;
+        }
+
+        .top-nav {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            padding: 1rem;
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            color: #f4f6f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .side-nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: var(--primary-blue);
+            color: white;
+            padding: 1rem;
+            z-index: 1100;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav-logo {
+            width: 100px;
+            height: auto;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 1rem 0;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+        }
+
+        .alert-float {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1500;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .welcome-message {
+            color: white;
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin: 0 0 30px 0;
+            text-align: center;
+        }
+
+        .fine-amount-text {
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 0;
+        }
+
+        .detection-details {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+
+        .confidence-meter {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            transition: width 0.5s ease;
+        }
+
+        .detection-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .badge-violation {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .badge-safe {
+            background-color: #51cf66;
+            color: white;
+        }
+
+        .detection-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .loading-spinner .spinner-border {
+            margin-right: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+            margin-left: 10px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(14px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-dialog {
+            max-width: 500px;
+            margin: 1.75rem auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8; /* Slightly transparent */
+        }
+        
+        .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            background-color: white;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .fine-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .fine-details p {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 1050;
+        }
+
+        .modal-backdrop {
+            z-index: 1040;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="side-nav">
+        <div class="nav-brand">
+            <img src="{{ url_for('static', filename='logo/logo.jpeg') }}" alt="Logo" class="nav-logo">
+            <span>Admin Panel</span>
+        </div>
+        <nav>
+            <a href="/admin/dashboard" class="nav-item">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/admin/fines_history" class="nav-item">
+                <i class="bi bi-receipt"></i> Fine History
+            </a>
+            <div class="nav-divider"></div>
+            <a href="{{ url_for('register_officer') }}" class="nav-item">
+                <i class="bi bi-person-plus-fill"></i> Register Officer
+            </a>
+            <a href="{{ url_for('admin_register_vehicle') }}" class="nav-item">
+                <i class="bi bi-car-front"></i> Register Vehicle
+            </a>
+            <a href="/admin/user_credentials" class="nav-item">
+                <i class="bi bi-key"></i> User Credentials
+            </a>
+            <a href="/admin/fine_update" class="nav-item">
+                <i class="bi bi-cash"></i> Fine Update
+            </a>
+            <a href="/admin/vehicle_reports" class="nav-item">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Vehicles Reports
+            </a>
+        </nav>
+    </div>
+    
+    <nav class="top-nav">
+        <div class="nav-content">
+            <h1 class="nav-title">
+                {% if request.endpoint == 'fines_history' %}
+                    <i class="bi bi-receipt"></i> Fine History
+                {% elif request.endpoint == 'register_officer' %}
+                    <i class="bi bi-person-plus-fill"></i> Register Officer
+                {% elif request.endpoint == 'admin_register_vehicle' %}
+                    <i class="bi bi-car-front"></i> Register Vehicle
+                {% else %}
+                    🚦 Vehicle Violation Management
+                {% endif %}
+            </h1>
+            <div class="nav-actions">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="welcome-message">
+            Hi, {{ session.username }}! Welcome back.
+        </div>
+        <div class="container">
+            <div class="metrics-container">
+                <div class="metric-card metric-card-fine">
+                    <div class="metric-card-icon">💰</div>
+                    <div>
+                        <h6>Total Fine Amount</h6>
+                        <h4>LKR {{ "%.2f"|format(stats[5] or 0) }}</h4>
+                    </div>
+                </div>
+                <div class="metric-card metric-card-pending">
+                    <div class="metric-card-icon">⏳</div>
+                    <div>
+                        <h6>Pending Fines</h6>
+                        <h4>LKR {{ "%.2f"|format(stats[3] or 0) }}</h4>
+                    </div>
+                </div>
+                <div class="metric-card metric-card-violations">
+                    <div class="metric-card-icon">🚨</div>
+                    <div>
+                        <h6>Total Violations</h6>
+                        <h4>{{ stats[0] or 0 }}</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="fineConfirmationModal" tabindex="-1" aria-labelledby="fineConfirmationModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="fineConfirmationModalLabel">Confirm Fine Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="fine-details">
+                                <p><strong>Vehicle Number:</strong> <span id="modal-vehicle"></span></p>
+                                <p><strong>Owner Name:</strong> <span id="modal-owner"></span></p>
+                                <p><strong>Violation Type:</strong> <span id="modal-violation"></span></p>
+                                <p><strong>Fine Amount:</strong> <span id="modal-fine-amount"></span></p>
+                                <p><strong>Issue Date:</strong> <span id="modal-date"></span></p>
+                                <p><strong>Issued By:</strong> <span id="modal-officer"></span></p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="confirmFine">Confirm Issue</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="violation-form">
+                        <h4 class="mb-4">🚗 Add Violation</h4>
+                        <form id="violation-form" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label">Vehicle Number</label>
+                                <select id="vehicle-number" name="vehicle_number" class="form-select" required>
+                                    <option value="">Select Vehicle Number</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 form-check" id="toggle-option" style="display: none;">
+                                <label class="form-check-label" for="toggle-detection">
+                                    Enable Seatbelt Violation Detection
+                                </label>
+                                <label class="switch" id="toggle-option">
+                                    <input type="checkbox" id="toggle-detection">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+
+                            <div id="vehicle-details">
+                                <h5>Vehicle Details</h5>
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th>Owner Name</th>
+                                            <td id="owner-name">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Address</th>
+                                            <td id="owner-address">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Email</th>
+                                            <td id="owner-email">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Phone Number</th>
+                                            <td id="owner-phone">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Violation Type</label>
+                                <select name="violation_type" id="violation-type" class="form-select" required>
+                                    <option value="">Select Violation Type</option>
+                                    {% for violation in violation_types %}
+                                    <option value="{{ violation.id }}" data-fine="{{ violation.fine_amount }}">{{ violation.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3" id="fine-amount-display" style="display:none;">
+                                <p class="fine-amount-text" id="fine-amount">Fine Amount: LKR 0.00</p>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Issue Fine
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    
+                </div>
+                <div class="col-md-6">
+                    <div class="violation-detection-form" id="detection-form-section">
+                        <h4 class="mb-4">🚨 Seatbelt Violation Detection</h4>
+                        <div class="upload-area" id="detection-upload-area">
+                            <input type="file" name="detection-image" accept="image/*" class="form-control" id="detection-image" style="display:none;">
+                            <img id="image-preview" alt="Image Preview" style="display:none; width:100%; height:auto; border-radius: 15px;">
+                            <div id="upload-instructions">
+                                <i class="bi bi-camera-fill text-primary" style="font-size: 4rem;"></i>
+                                <h4>Detect Violation</h4>
+                                <p class="text-muted">
+                                    Upload an image to automatically detect seatbelt violations
+                                </p>
+                                <button id="trigger-detection-upload" class="btn btn-primary mt-3">
+                                    <i class="bi bi-cloud-upload me-2"></i>Upload Image
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="detection-result" class="detection-result" style="display:none;">
+                            <div class="loading-spinner" id="detection-loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span>Analyzing image...</span>
+                            </div>
+                
+                            <div class="detection-details" id="detection-details" style="display:none;">
+                                <div id="detection-badge" class="detection-badge"></div>
+                                
+                                <h5>Confidence Analysis</h5>
+                                <div class="confidence-meter">
+                                    <div id="confidence-bar" class="confidence-bar"></div>
+                                </div>
+                                <p id="confidence-text" class="mb-3"></p>
+                
+                                <div class="detection-stats">
+                                    <div class="stat-card">
+                                        <h6>Detection Count</h6>
+                                        <p id="detection-count" class="mb-0">-</p>
+                                    </div>
+                                    <div class="stat-card">
+                                        <h6>Average Confidence</h6>
+                                        <p id="avg-confidence" class="mb-0">-</p>
+                                    </div>
+                                </div>
+                
+                                <p id="detection-reason" class="mt-3 mb-2"></p>
+                
+                                <div class="d-flex justify-content-center mt-3">
+                                    <button id="reset-detection" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                                    </button>
+                            </div>
+
+
+                        
+                            <div id="successAlert" class="alert alert-success alert-float" style="display: none;">
+                                Fine Issued Successfully!
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fineModal = new bootstrap.Modal(document.getElementById('fineConfirmationModal'));
+            let formData = null;
+            let detectionConfidence = 0;
+
+            function showFlashMessage(message, type = 'danger') {
+                const existingAlerts = document.querySelectorAll('.alert-float');
+                existingAlerts.forEach(alert => alert.remove());
+        
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-float`;
+                alertDiv.style.display = 'block';
+                alertDiv.innerHTML = `
+                    <i class="bi ${type === 'danger' ? 'bi-exclamation-circle' : 'bi-check-circle'}"></i>
+                    ${message}`;
+        
+                document.body.appendChild(alertDiv);
+        
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+
+            const vehicleSelect = document.getElementById('vehicle-number');
+            const toggleOption = document.getElementById('toggle-option');
+            const violationTypeElement = document.getElementById('violation-type');
+            const fineAmountDisplay = document.getElementById('fine-amount-display');
+            const fineAmountElement = document.getElementById('fine-amount');
+            const detectionFormSection = document.getElementById('detection-form-section');
+        const violationFormColumn = document.querySelector('.col-md-6');
+        const toggleDetectionSwitch = document.getElementById('toggle-detection');
+
+        toggleDetectionSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                detectionFormSection.style.display = 'block';
+                detectionFormSection.classList.add('animate-fade-in');
+                violationFormColumn.style.transition = 'transform 0.5s ease';
+                violationFormColumn.style.transform = 'translateX(-50%)';
+            } else {
+                detectionFormSection.style.display = 'none';
+                violationFormColumn.style.transform = 'translateX(0)';
+            }
+        });
+
+            fetch('/admin/get_vehicle_numbers')
+                .then(response => response.json())
+                .then(vehicleNumbers => {   
+                    const choices = new Choices(vehicleSelect, {
+                        searchEnabled: true,
+                        placeholder: true,
+                        placeholderValue: 'Select Vehicle Number',
+                        shouldSort: false
+                    });
+
+                    vehicleNumbers.forEach(number => {
+                        choices.setChoices([
+                            {value: number, label: number}
+                        ], 'value', 'label', false);
+                    });
+
+                    vehicleSelect.addEventListener('change', function() {
+                        const selectedVehicle = this.value;
+                        const vehicleDetails = document.getElementById('vehicle-details');
+
+                        if (selectedVehicle) {
+                            fetch(`/admin/fetch_vehicle?vehicle_number=${selectedVehicle}`)
+                                .then(response => response.json())
+                                .then(details => {
+                                    if (!details.error) {
+                                        document.getElementById('owner-name').textContent = details.owner_name;
+                                        document.getElementById('owner-address').textContent = details.address;
+                                        document.getElementById('owner-email').textContent = details.email;
+                                        document.getElementById('owner-phone').textContent = details.phone_number;
+                                        
+                                        vehicleDetails.style.display = 'block';
+                                        toggleOption.style.display = 'block';
+                                    } else {
+                                        vehicleDetails.style.display = 'none';
+                                        toggleOption.style.display = 'flex';
+                                        alert('Vehicle details not found');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    vehicleDetails.style.display = 'none';
+                                    toggleOption.style.display = 'none';
+                                });
+                        } else {
+                            vehicleDetails.style.display = 'none';
+                            toggleOption.style.display = 'none';
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching vehicle numbers:', error);
+                });
+
+            violationTypeElement.addEventListener('change', function() {
+                const selectedOption = violationTypeElement.options[violationTypeElement.selectedIndex];
+                const fineAmount = selectedOption.getAttribute('data-fine');
+
+                if (fineAmount > 0) {
+                    fineAmountElement.textContent = `Fine Amount: LKR ${parseFloat(fineAmount).toFixed(2)}`;
+                    fineAmountDisplay.style.display = 'block';
+                } else {
+                    fineAmountDisplay.style.display = 'none';
+                }
+            });
+
+
+            const violationForm = document.getElementById('violation-form');
+            violationForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const vehicleNumber = document.getElementById('vehicle-number').value;
+                const violationType = document.getElementById('violation-type');
+                const detectionEnabled = document.getElementById('toggle-detection').checked;
+                const detectionImage = document.getElementById('detection-image').files[0];
+                
+                if (!vehicleNumber || !violationType.value) {
+                    showFlashMessage('Please select both vehicle number and violation type');
+                    return;
+                }
+
+                if (detectionEnabled && !detectionImage) {
+                    showFlashMessage('Please upload an image for violation detection or disable violation detection');
+                    return;
+                }
+
+                const violationText = violationType.options[violationType.selectedIndex].text;
+                const fineAmount = violationType.options[violationType.selectedIndex].getAttribute('data-fine');
+                
+                document.getElementById('modal-vehicle').textContent = vehicleNumber;
+                document.getElementById('modal-owner').textContent = document.getElementById('owner-name').textContent;
+                document.getElementById('modal-violation').textContent = violationText;
+                document.getElementById('modal-fine-amount').textContent = `LKR ${parseFloat(fineAmount).toFixed(2)}`;
+                document.getElementById('modal-date').textContent = new Date().toLocaleString();
+                document.getElementById('modal-officer').textContent = `{{ session.username }}`;
+                
+                formData = new FormData(violationForm);
+                formData.append('confidence', detectionConfidence);
+                
+                fineModal.show();
+            });
+            
+            document.getElementById('confirmFine').addEventListener('click', function() {
+                if (formData) {
+                    const detectionImage = document.getElementById('detection-image').files[0];
+                    if (detectionImage) {
+                        formData.append('violation_image', detectionImage);
+                    }
+                    fetch('/admin/dashboard', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        fineModal.hide();
+                        
+                       
+                        const vehicleNumber = document.getElementById('vehicle-number').value;
+                        showFlashMessage(`Fine Issued to ${vehicleNumber} Successfully!`, 'success');
+                        
+                        setTimeout(() => {
+                          
+                            violationForm.reset();
+                            document.getElementById('vehicle-details').style.display = 'none';
+                            document.getElementById('toggle-option').style.display = 'none';
+                            window.location.reload();
+                        }, 5000);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showFlashMessage('An error occurred while issuing the fine.');
+                    });
+                }
+            });
+
+            document.getElementById('trigger-detection-upload').addEventListener('click', function() {
+                document.getElementById('detection-image').click();
+            });
+
+            document.getElementById('detection-image').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                const detectionResult = document.getElementById('detection-result');
+                const detectionLoading = document.getElementById('detection-loading');
+                const detectionDetails = document.getElementById('detection-details');
+                const imagePreview = document.getElementById('image-preview');
+                const uploadInstructions = document.getElementById('upload-instructions');
+                
+                if (file) {
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        uploadInstructions.style.display = 'none';
+                    };
+            
+                    reader.readAsDataURL(file);
+
+                    detectionResult.style.display = 'block';
+                    detectionLoading.style.display = 'flex';
+                    detectionDetails.style.display = 'none';
+
+                    const formData = new FormData();
+                    formData.append('detection-image', file);
+
+                    fetch('/admin/dashboard', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        detectionLoading.style.display = 'none';
+                        detectionDetails.style.display = 'block';
+
+                        detectionConfidence = result.confidence || 0;
+
+                        const badge = document.getElementById('detection-badge');
+                        const confidenceBar = document.getElementById('confidence-bar');
+                        const confidenceText = document.getElementById('confidence-text');
+                        const detectionCount = document.getElementById('detection-count');
+                        const avgConfidence = document.getElementById('avg-confidence');
+                        const reason = document.getElementById('detection-reason');
+
+                        if (result.status === 'error') {
+                            badge.className = 'detection-badge badge-violation';
+                            badge.textContent = '❌ Detection Error';
+                            reason.textContent = result.reason || 'Unknown error occurred';
+                            
+                            confidenceBar.style.width = '0%';
+                            confidenceText.textContent = 'Confidence: 0%';
+                            detectionCount.textContent = '0';
+                            avgConfidence.textContent = '0%';
+                        } else {
+                            badge.className = 'detection-badge ' + 
+                                (result.status === 'violation' ? 'badge-violation' : 'badge-safe');
+                            badge.textContent = result.status === 'violation' ? 
+                                '🚫 Violation Detected' : '✅ No Violation';
+
+
+                            confidenceBar.style.width = `${result.confidence * 100}%`;
+                            confidenceText.textContent = `Confidence: ${(result.confidence * 100).toFixed(1)}%`;
+
+                            detectionCount.textContent = result.detection_count;
+                            avgConfidence.textContent = `${(result.average_confidence * 100).toFixed(1)}%`;
+                            reason.textContent = result.reason;
+
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        detectionLoading.style.display = 'none';
+                        detectionDetails.style.display = 'block';
+                        
+                        const badge = document.getElementById('detection-badge');
+                        badge.className = 'detection-badge badge-violation';
+                        badge.textContent = '❌ Detection Error';
+                        
+                        document.getElementById('detection-reason').textContent = 
+                            'Failed to process image. Please try again.';
+                        
+                        document.getElementById('confidence-bar').style.width = '0%';
+                        document.getElementById('confidence-text').textContent = 'Confidence: 0%';
+                        document.getElementById('detection-count').textContent = '0';
+                        document.getElementById('avg-confidence').textContent = '0%';
+                    });
+                }
+            });
+
+                        
+            document.getElementById('reset-detection').addEventListener('click', function() {
+                const detectionResult = document.getElementById('detection-result');
+                const detectionImage = document.getElementById('detection-image');
+                const detectionDetails = document.getElementById('detection-details');
+                const imagePreview = document.getElementById('image-preview');
+                const uploadInstructions = document.getElementById('upload-instructions');
+                
+                detectionResult.style.display = 'none';
+                detectionImage.value = '';
+                detectionDetails.style.display = 'none';
+                imagePreview.style.display = 'none';
+                uploadInstructions.style.display = 'block';
+
+                detectionConfidence = 0;
+            });
+        });
+    </script>
+</body>
+</html>
